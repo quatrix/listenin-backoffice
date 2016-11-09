@@ -9,7 +9,8 @@ type alias Club =
     , logo : Logo
     , details : String
     , samples : List Sample
-    , playing : String
+    , playing : String -- FIXME maybe these should be Maybe?
+    , showForHowLongBox: Bool
     }
 
 type alias Sample =
@@ -42,6 +43,7 @@ decodeClub =
         |: ("details" := Json.Decode.string)
         |: ("samples" := Json.Decode.list decodeSample)
         |: (Json.Decode.succeed "")
+        |: (Json.Decode.succeed False) 
 
 decodeLogo : Json.Decode.Decoder Logo
 decodeLogo =

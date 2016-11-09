@@ -9,6 +9,6 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { club = Club "vova" ["a","b"] (Logo "")"heh" [] ""
+    { club = Club "vova" ["a","b"] (Logo "")"heh" [] "" False
     , time = 0
     }
