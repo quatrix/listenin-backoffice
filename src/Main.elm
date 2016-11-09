@@ -1,15 +1,17 @@
 module Main exposing (..)
 
 import Html.App
-import Messages exposing (Msg)
-import Models exposing (Model)
+import Messages exposing (Msg(..))
+import Models exposing (Model, initialModel)
 import View exposing (view)
 import Update exposing (update)
+import Club.Commands exposing (fetch)
+import Commands exposing (..)
 
-
-init : ( Model, Cmd Msg )
+init : (Model, Cmd Msg)
 init =
-    ( "Hello", Cmd.none )
+  (initialModel, Cmd.batch [getTime, (Cmd.map ClubMsg fetch)])
+
 
 
 subscriptions : Model -> Sub Msg
@@ -24,7 +26,7 @@ subscriptions model =
 main : Program Never
 main =
     Html.App.program
-        { init = init
+        { init = init 
         , view = view
         , update = update
         , subscriptions = subscriptions
