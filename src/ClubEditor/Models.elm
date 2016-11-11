@@ -1,7 +1,18 @@
-module Club.Models exposing (..)
+module ClubEditor.Models exposing (..)
 import Json.Decode exposing ((:=))
-import Json.Decode.Extra exposing ((|:))
+import Json.Decode.Extra exposing ((|:), withDefault)
 
+type StopButton
+    = StopRecording
+    | StopPublishing
+    | StopRecognition
+
+type alias ClubEditor =
+    { club : Club
+    , playing : String
+    , showForHowLongBox: Maybe StopButton
+    , isClubEditWindowVisible : Bool
+    }
 
 type alias Club =
     { name : String
@@ -9,8 +20,9 @@ type alias Club =
     , logo : Logo
     , details : String
     , samples : List Sample
-    , playing : String -- FIXME maybe these should be Maybe?
-    , showForHowLongBox: Bool
+    , stopPublishing : Maybe Int
+    , stopRecording : Maybe Int
+    , stopRecognition : Maybe Int
     }
 
 type alias Sample =
@@ -42,8 +54,9 @@ decodeClub =
         |: ("logo" := decodeLogo)
         |: ("details" := Json.Decode.string)
         |: ("samples" := Json.Decode.list decodeSample)
-        |: (Json.Decode.succeed "")
-        |: (Json.Decode.succeed False) 
+        |: (("stopRecording" := Json.Decode.maybe Json.Decode.int) |> (withDefault Nothing))
+        |: (("stopPublishing" := Json.Decode.maybe Json.Decode.int) |> (withDefault Nothing))
+        |: (("stopRecognition" := Json.Decode.maybe Json.Decode.int) |> (withDefault Nothing))
 
 decodeLogo : Json.Decode.Decoder Logo
 decodeLogo =

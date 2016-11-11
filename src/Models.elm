@@ -1,14 +1,28 @@
 module Models exposing (..)
-import Club.Models exposing (Club, Logo)
+import ClubEditor.Models exposing (ClubEditor, Club, Logo)
 import Time exposing (Time)
 
 type alias Model =
-    { club : Club
+    { clubEditor : ClubEditor
     , time : Time -- FIXME should be Maybe Time
     }
 
 initialModel : Model
 initialModel =
-    { club = Club "vova" ["a","b"] (Logo "")"heh" [] "" False
-    , time = 0
+    { clubEditor = {
+        club = {
+              name = "Loading Club"
+            , tags = []
+            , logo = { xxxhdpi = "" }
+            , details = ""
+            , samples = []
+            , stopPublishing = Nothing
+            , stopRecording = Nothing
+            , stopRecognition = Nothing
+        }
+        , playing = ""
+        , showForHowLongBox = Nothing
+        , isClubEditWindowVisible = False
+    }
+    , time = 0.0
     }

@@ -5,12 +5,12 @@ import Messages exposing (Msg(..))
 import Models exposing (Model, initialModel)
 import View exposing (view)
 import Update exposing (update)
-import Club.Commands exposing (fetch)
+import ClubEditor.Commands exposing (fetch)
 import Commands exposing (..)
 
 init : (Model, Cmd Msg)
 init =
-  (initialModel, Cmd.batch [getTime, (Cmd.map ClubMsg fetch)])
+  (initialModel, Cmd.batch [getTime, (Cmd.map ClubEditorMsg fetch)])
 
 
 

@@ -1,8 +1,8 @@
 module Messages exposing (..)
-import Club.Messages
+import ClubEditor.Messages
 import Time exposing (Time)
 
 
 type Msg
-    = ClubMsg Club.Messages.Msg
+    = ClubEditorMsg ClubEditor.Messages.Msg
     | GotTime Time

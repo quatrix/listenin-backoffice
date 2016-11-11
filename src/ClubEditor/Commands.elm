@@ -1,9 +1,9 @@
-module Club.Commands exposing (..)
+module ClubEditor.Commands exposing (..)
 
 import Http
 import Task
-import Club.Models exposing (decodeClub, Club)
-import Club.Messages exposing (..)
+import ClubEditor.Models exposing (decodeClub)
+import ClubEditor.Messages exposing (..)
 
 fetch : Cmd Msg
 fetch = 
