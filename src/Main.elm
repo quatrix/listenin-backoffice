@@ -6,11 +6,12 @@ import Models exposing (Model, initialModel)
 import View exposing (view)
 import Update exposing (update)
 import Commands exposing (..)
+import ClubEditor.Commands exposing (..)
 
-init : (Model, Cmd Msg)
+
+init : ( Model, Cmd Msg )
 init =
-  (initialModel, Cmd.batch [getTime, fetch])
-
+    ( initialModel, Cmd.batch [ getTime, fetch ] )
 
 
 subscriptions : Model -> Sub Msg
@@ -25,7 +26,7 @@ subscriptions model =
 main : Program Never
 main =
     Html.App.program
-        { init = init 
+        { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions

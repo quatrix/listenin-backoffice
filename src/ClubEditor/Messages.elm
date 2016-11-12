@@ -1,5 +1,6 @@
 module ClubEditor.Messages exposing (..)
-import ClubEditor.Models exposing (Club, StopButton, ServerResponse)
+
+import ClubEditor.Models exposing (Club, StopButton, SystemMessage)
 import Http
 
 
@@ -18,3 +19,4 @@ type Msg
     | CloseClubEditWindow
     | UpdateClubDone Club
     | UpdateClubFailed Http.Error
+    | HideSystemMessage Int

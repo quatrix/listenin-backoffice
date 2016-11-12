@@ -1,19 +1,36 @@
 module ClubEditor.Models exposing (..)
+
 import Json.Decode exposing ((:=))
 import Json.Encode
 import Json.Decode.Extra exposing ((|:), withDefault)
+
 
 type StopButton
     = StopRecording
     | StopPublishing
     | StopRecognition
 
+
+type SystemMessageType
+    = Error
+    | Warning
+    | Success
+    | Info
+
+type alias SystemMessage =
+    { isLoading: Bool
+    , msg: String
+    , msgType: SystemMessageType
+    }
+
 type alias ClubEditor =
     { club : Club
     , playing : String
-    , showForHowLongBox: Maybe StopButton
+    , showForHowLongBox : Maybe StopButton
     , isClubEditWindowVisible : Bool
+    , systemMessage : Maybe SystemMessage
     }
+
 
 type alias Club =
     { name : String
@@ -26,15 +43,18 @@ type alias Club =
     , stopRecognition : Int
     }
 
+
 type alias Sample =
     { date : String
     , link : String
     , metadata : SampleMetadata
     }
 
+
 type alias Logo =
-    { xxxhdpi: String
+    { xxxhdpi : String
     }
+
 
 type alias SampleMetadataRecognized_song =
     { album : String
@@ -43,9 +63,11 @@ type alias SampleMetadataRecognized_song =
     , title : String
     }
 
+
 type alias SampleMetadata =
     { recognized_song : Maybe SampleMetadataRecognized_song
     }
+
 
 decodeClub : Json.Decode.Decoder Club
 decodeClub =
@@ -65,6 +87,7 @@ decodeLogo =
     Json.Decode.succeed Logo
         |: ("xxxhdpi" := Json.Decode.string)
 
+
 decodeSample : Json.Decode.Decoder Sample
 decodeSample =
     Json.Decode.succeed Sample
@@ -72,10 +95,12 @@ decodeSample =
         |: ("link" := Json.Decode.string)
         |: ("metadata" := decodeSampleMetadata)
 
+
 decodeSampleMetadata : Json.Decode.Decoder SampleMetadata
 decodeSampleMetadata =
     Json.Decode.succeed SampleMetadata
         |: ("recognized_song" := Json.Decode.maybe decodeSampleMetadataRecognized_song)
+
 
 decodeSampleMetadataRecognized_song : Json.Decode.Decoder SampleMetadataRecognized_song
 decodeSampleMetadataRecognized_song =
@@ -89,9 +114,9 @@ decodeSampleMetadataRecognized_song =
 encodeClub : Club -> Json.Encode.Value
 encodeClub record =
     Json.Encode.object
-        [ ("details",  Json.Encode.string <| record.details)
-        , ("tags",  Json.Encode.list <| List.map Json.Encode.string <| record.tags)
-        , ("stopPublishing",  Json.Encode.int <| record.stopPublishing)
-        , ("stopRecording",  Json.Encode.int <| record.stopRecording)
-        , ("stopRecognition",  Json.Encode.int <| record.stopRecognition)
+        [ ( "details", Json.Encode.string <| record.details )
+        , ( "tags", Json.Encode.list <| List.map Json.Encode.string <| record.tags )
+        , ( "stopPublishing", Json.Encode.int <| record.stopPublishing )
+        , ( "stopRecording", Json.Encode.int <| record.stopRecording )
+        , ( "stopRecognition", Json.Encode.int <| record.stopRecognition )
         ]
