@@ -12,8 +12,9 @@ import Messages exposing (..)
 
 view : Model -> Html Msg
 view model =
-    let
-        bgImage = "url(http://cdn.pcwallart.com/images/gif-tumblr-backgrounds-wallpaper-2.jpg)"
-    in
-        div [ style [("background-image", bgImage)]] 
-        [ Html.App.map ClubEditorMsg (ClubEditor.View.view model.clubEditor model.time) ]
+    case model.clubEditor of
+        Just clubEditor ->
+            div [] 
+            [ Html.App.map ClubEditorMsg (ClubEditor.View.view clubEditor model.time) ]
+        Nothing ->
+            div [] [text "Loading"]

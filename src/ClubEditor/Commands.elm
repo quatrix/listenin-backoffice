@@ -1,16 +1,18 @@
 module ClubEditor.Commands exposing (..)
+import ClubEditor.Models exposing (Club, encodeClub, decodeClub)
+import Commands exposing (clubUrl)
+import ClubEditor.Messages exposing (Msg(..))
 
 import Http
+import Json.Decode
+import Json.Encode
 import Task
-import ClubEditor.Models exposing (decodeClub)
-import ClubEditor.Messages exposing (..)
 
-fetch : Cmd Msg
-fetch = 
-    Http.get decodeClub clubUrl 
-        |> Task.perform FetchFailed FetchDone
+serialized : Json.Encode.Value -> String
+serialized v =
+    Json.Encode.encode 0 v
 
-
-clubUrl : String
-clubUrl =
-    "http://localhost:55669/clubs?club=radio"
+updateClub : Club -> Cmd Msg
+updateClub club = 
+    Http.post decodeClub clubUrl (Http.string (serialized (encodeClub club)))
+        |> Task.perform UpdateClubFailed UpdateClubDone

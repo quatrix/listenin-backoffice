@@ -10,6 +10,8 @@ import ClubEditor.Messages exposing (..)
 import Messages
 import Time exposing (Time)
 import Date
+import Date.Extra.Duration as Duration
+import String
 
 view : ClubEditor -> Time -> Html Msg
 view clubEditor time =
@@ -20,7 +22,7 @@ view clubEditor time =
             [ 
               header club
             , clubEditWindow clubEditor.isClubEditWindowVisible club
-            , stopButtons club clubEditor.showForHowLongBox
+            , stopButtons time club clubEditor.showForHowLongBox
             , audio
                 [ id "audio-player"
                 , controls False
@@ -32,7 +34,7 @@ view clubEditor time =
 
 header : Club -> Html Msg
 header club =
-    div[class "flex h1 white"] [
+    div[class "flex h1"] [
       img [src club.logo.xxxhdpi, style [("width", "50px"), ("height", "50px")]] []
     , text club.name
     , button [class "btn btn-primary mb1 bg-teal", onClick OpenClubEditWindow] [i[class "fa fa-info mr1"][], text "Edit Info"]
@@ -42,7 +44,7 @@ clubEditWindow : Bool -> Club -> Html Msg
 clubEditWindow visible club = 
     if visible then
         div [] [
-            div[class "p2 bg-yellow border rounded sm-col-6 my1"] [
+            div[class "p2 bg-yellow border rounded sm-col-5"] [
                 div[] [
                     text "Description", 
                     textarea [class "textarea", rows 3, onInput DescriptionChanged] [text club.details]
@@ -59,34 +61,47 @@ clubEditWindow visible club =
     else
         div[][]
 
-stopButtons : Club -> Maybe StopButton -> Html Msg
-stopButtons club showForHowLongBox =
+stopButtons : Time -> Club -> Maybe StopButton -> Html Msg
+stopButtons timeNow club showForHowLongBox =
     let 
-        publishingMsg = "Published. Click to hide from club list" 
+        publishingMsg = "Click to hide from club list" 
         stopPublishingMsg = "Publishing disabled, click to enable. will self enable in "
         recordingMsg = "Recording. click to stop." 
         stopRecordingMsg = "Recording disabled, click to enable. will self enable in "
         recognizingMsg = "Recognizing. click to stop."
-        stopRecognizingMsg =  "Sample recognition disabled. click to enable. will self enable in "
+        stopRecognizingMsg = "Sample recognition disabled. click to enable. will self enable in "
     in
-        div[class "sm-col-6 bg-orange border"] [ 
-            stopButton club.stopPublishing StopPublishing "fa-lock" publishingMsg stopPublishingMsg
-          , stopButton club.stopRecording StopRecording "fa-circle" recordingMsg stopRecordingMsg 
-          , stopButton club.stopRecognition StopRecognition "fa-eye" recognizingMsg stopRecognizingMsg
+        div[class "sm-col-5 bg-orange border"] [ 
+            stopButton timeNow club.stopPublishing StopPublishing "fa-lock" publishingMsg stopPublishingMsg
+          , stopButton timeNow club.stopRecording StopRecording "fa-circle" recordingMsg stopRecordingMsg 
+          , stopButton timeNow club.stopRecognition StopRecognition "fa-headphones" recognizingMsg stopRecognizingMsg
           , forHowLongBox showForHowLongBox
         ]
 
-stopButton : Maybe Int -> StopButton -> String -> String -> String -> Html Msg
-stopButton disabledFor stopType icon disablingLable enablingLable = 
+stopButton : Time -> Int -> StopButton -> String -> String -> String -> Html Msg
+stopButton timeNow forHowLong stopType icon disablingLable enablingLable = 
     let
         buttonStyle = style [("width", "150px"), ("height", "200px")]
+        iconStyle = style [("font-size", "30px")]
     in
-        case disabledFor of
-            Just forHowLog ->
-                button [class "btn btn-primary bg-red mr1", buttonStyle, onClick (ResumeStopped stopType)] [ div [ class ("fa " ++ icon ++ " my1") ] [], div [] [ text (enablingLable ++ (toString forHowLog))]]
-            Nothing -> 
-                button [class "btn btn-primary bg-green mr1", buttonStyle, onClick (AskForHowLong stopType)] [ div [ class ("fa " ++ icon ++ " my1") ] [], div [] [ text disablingLable ]]
+        if forHowLong == 0 then
+            button [class "btn btn-primary bg-green", buttonStyle, onClick (AskForHowLong stopType)] [ div [ iconStyle, class ("fa " ++ icon ++ " my1") ] [], div [] [ text disablingLable ]]
+        else
+            button [class "btn btn-primary bg-red", buttonStyle, onClick (ResumeStopped stopType)] [ div [ iconStyle, class ("fa " ++ icon ++ " my1") ] [], div [] [ text (enablingLable ++ (getHour timeNow forHowLong))]]
 
+
+getHour : Time -> Float -> String
+getHour timeNow d =
+    if d == -1 then
+        "Never"
+    else
+        let
+            date = if d < 100 then
+                Duration.add Duration.Hour d (Date.fromTime timeNow)
+            else 
+                Date.fromTime (d * 1000)
+        in
+            (String.padLeft 2 '0' (toString (Date.hour date))) ++ ":" ++ (String.padLeft 2 '0' (toString (Date.minute date)))
 
 forHowLongBox : Maybe StopButton -> Html Msg
 forHowLongBox stopButtonType =
@@ -94,10 +109,10 @@ forHowLongBox stopButtonType =
         Just stopButton -> 
             div [] [
                 div[class "h3"] [text "This is where an explanation goes"]
-              , div [] [ button[onClick (SubmitStopEvent stopButton 1)] [text "1 Hour"]
-                   , button[onClick (SubmitStopEvent stopButton 2)] [text "2 Hours"]
-                   , button[onClick (SubmitStopEvent stopButton -1)] [text "Forever"]
-                   , button[onClick CloseForHowLongModal] [text "Cancel"]
+              , div [] [ button[class "btn btn-primary", onClick (SubmitStopEvent stopButton 1)] [text "1 Hour"]
+                   , button[class "btn btn-primary", onClick (SubmitStopEvent stopButton 2)] [text "2 Hours"]
+                   , button[class "btn btn-primary", onClick (SubmitStopEvent stopButton -1)] [text "Forever"]
+                   , button[class "btn bg-gray", onClick CloseForHowLongModal] [text "Cancel"]
                 ]
             ]
         Nothing ->
@@ -111,7 +126,7 @@ toCheckbox enabledTags tag =
 checkbox : msg -> String -> Bool -> Html msg
 checkbox msg name isChecked =
   label
-    [ style [("padding", "5px")]
+    [ class "h6 mr1"
     ]
     [ input [ type' "checkbox", onClick msg, checked isChecked ] []
     , text name
@@ -120,7 +135,7 @@ checkbox msg name isChecked =
 
 sampleList : List Sample -> Time -> String -> Html Msg
 sampleList samples time playing =
-    div[ class "p2 white" ] 
+    div[ class "p2" ] 
     [
     table [] 
     [ thead[]

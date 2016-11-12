@@ -1,5 +1,6 @@
 module ClubEditor.Models exposing (..)
 import Json.Decode exposing ((:=))
+import Json.Encode
 import Json.Decode.Extra exposing ((|:), withDefault)
 
 type StopButton
@@ -20,9 +21,9 @@ type alias Club =
     , logo : Logo
     , details : String
     , samples : List Sample
-    , stopPublishing : Maybe Int
-    , stopRecording : Maybe Int
-    , stopRecognition : Maybe Int
+    , stopPublishing : Int
+    , stopRecording : Int
+    , stopRecognition : Int
     }
 
 type alias Sample =
@@ -54,9 +55,10 @@ decodeClub =
         |: ("logo" := decodeLogo)
         |: ("details" := Json.Decode.string)
         |: ("samples" := Json.Decode.list decodeSample)
-        |: (("stopRecording" := Json.Decode.maybe Json.Decode.int) |> (withDefault Nothing))
-        |: (("stopPublishing" := Json.Decode.maybe Json.Decode.int) |> (withDefault Nothing))
-        |: (("stopRecognition" := Json.Decode.maybe Json.Decode.int) |> (withDefault Nothing))
+        |: ("stopPublishing" := Json.Decode.int)
+        |: ("stopRecording" := Json.Decode.int)
+        |: ("stopRecognition" := Json.Decode.int)
+
 
 decodeLogo : Json.Decode.Decoder Logo
 decodeLogo =
@@ -82,3 +84,14 @@ decodeSampleMetadataRecognized_song =
         |: ("genres" := Json.Decode.list Json.Decode.string)
         |: ("artists" := Json.Decode.list Json.Decode.string)
         |: ("title" := Json.Decode.string)
+
+
+encodeClub : Club -> Json.Encode.Value
+encodeClub record =
+    Json.Encode.object
+        [ ("details",  Json.Encode.string <| record.details)
+        , ("tags",  Json.Encode.list <| List.map Json.Encode.string <| record.tags)
+        , ("stopPublishing",  Json.Encode.int <| record.stopPublishing)
+        , ("stopRecording",  Json.Encode.int <| record.stopRecording)
+        , ("stopRecognition",  Json.Encode.int <| record.stopRecognition)
+        ]

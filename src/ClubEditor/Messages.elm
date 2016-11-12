@@ -1,12 +1,10 @@
 module ClubEditor.Messages exposing (..)
-import ClubEditor.Models exposing (Club, StopButton)
+import ClubEditor.Models exposing (Club, StopButton, ServerResponse)
 import Http
 
 
 type Msg
-    = FetchDone Club
-    | FetchFailed Http.Error
-    | Play String
+    = Play String
     | Delete String
     | Stop
     | Save
@@ -18,3 +16,5 @@ type Msg
     | CloseForHowLongModal
     | OpenClubEditWindow
     | CloseClubEditWindow
+    | UpdateClubDone Club
+    | UpdateClubFailed Http.Error
