@@ -24,7 +24,7 @@ view clubEditor time =
             [ systemMessage clubEditor.systemMessage
             , header club
             , clubEditWindow clubEditor.isClubEditWindowVisible club
-            , stopButtons time club clubEditor.showForHowLongBox
+            , stopButtons time club clubEditor.showForHowLongBox clubEditor.stopMsg
             , audio
                 [ id "audio-player"
                 , controls False
@@ -121,37 +121,44 @@ clubEditWindow visible club =
         div [] []
 
 
-stopButtons : Time -> Club -> Maybe StopButton -> Html Msg
-stopButtons timeNow club showForHowLongBox =
+type alias StopActionMsgs = 
+    { toStop : String
+    , toStart : String
+    , help : String
+    }
+
+stopButtons : Time -> Club -> Maybe StopButton -> String -> Html Msg
+stopButtons timeNow club stopType stopMsg =
     let
-        publishingMsg =
-            "Click to hide from club list"
+        publishing = 
+            { toStop = "Click to hide from club list"
+            , toStart = "Publishing disabled, click to enable. will self enable at "
+            , help = "Control your visibility. Users won't see your club for set amount of time, or if choosing forever, we'll hide you until you click again"
+            }
 
-        stopPublishingMsg =
-            "Publishing disabled, click to enable. will self enable at "
+        recording = 
+            { toStop = "Recording. click to stop."
+            , toStart = "Recording disabled, click to enable. will self enable at "
+            , help = "Temporary stop recording, this is useful when having live music / lectures. Users will still see you listed, and can listen to older samples from before stopping recording."
+            }
 
-        recordingMsg =
-            "Recording. click to stop."
+        recognition = 
+            { toStop = "Recognizing. click to stop."
+            , toStart = "Sample recognition disabled. click to enable. will self enable at "
+            , help = "If selected, we won't tag samples with the artist name / song title we recognize. User will only get the genre"
+            }
 
-        stopRecordingMsg =
-            "Recording disabled, click to enable. will self enable at "
-
-        recognizingMsg =
-            "Recognizing. click to stop."
-
-        stopRecognizingMsg =
-            "Sample recognition disabled. click to enable. will self enable at "
     in
         div [ class "sm-col-5 bg-orange border" ]
-            [ stopButton timeNow club.stopPublishing StopPublishing "fa-lock" publishingMsg stopPublishingMsg
-            , stopButton timeNow club.stopRecording StopRecording "fa-circle" recordingMsg stopRecordingMsg
-            , stopButton timeNow club.stopRecognition StopRecognition "fa-headphones" recognizingMsg stopRecognizingMsg
-            , forHowLongBox showForHowLongBox
+            [ stopButton timeNow club.stopPublishing StopPublishing "fa-lock" publishing
+            , stopButton timeNow club.stopRecording StopRecording "fa-circle" recording
+            , stopButton timeNow club.stopRecognition StopRecognition "fa-headphones" recognition
+            , forHowLongBox stopType stopMsg
             ]
 
 
-stopButton : Time -> Int -> StopButton -> String -> String -> String -> Html Msg
-stopButton timeNow forHowLong stopType icon disablingLable enablingLable =
+stopButton : Time -> Int -> StopButton -> String -> StopActionMsgs -> Html Msg
+stopButton timeNow forHowLong stopType icon labels =
     let
         buttonStyle =
             style [ ( "width", "150px" ), ( "height", "200px" ) ]
@@ -173,14 +180,14 @@ stopButton timeNow forHowLong stopType icon disablingLable enablingLable =
 
         label =
             if forHowLong == 0 then
-                disablingLable
+                labels.toStop
             else
-                (enablingLable ++ (getHour timeNow forHowLong))
+                (labels.toStart ++ (getHour timeNow forHowLong))
     in
         button
             [ class ("btn btn-primary " ++ buttonColorClass)
             , buttonStyle
-            , onClick (onClickAction stopType)
+            , onClick (onClickAction stopType labels.help)
             ]
             [ div [ iconStyle, class ("fa " ++ icon ++ " my1") ] []
             , div [] [ text label ]
@@ -202,12 +209,12 @@ getHour timeNow d =
             (String.padLeft 2 '0' (toString (Date.hour date))) ++ ":" ++ (String.padLeft 2 '0' (toString (Date.minute date)))
 
 
-forHowLongBox : Maybe StopButton -> Html Msg
-forHowLongBox stopButtonType =
+forHowLongBox : Maybe StopButton -> String -> Html Msg
+forHowLongBox stopButtonType description =
     case stopButtonType of
         Just stopButton ->
             div []
-                [ div [ class "h3" ] [ text "This is where an explanation goes" ]
+                [ div [ class "h3" ] [ text description ]
                 , div []
                     [ button [ class "btn btn-primary", onClick (SubmitStopEvent stopButton 1) ] [ text "1 Hour" ]
                     , button [ class "btn btn-primary", onClick (SubmitStopEvent stopButton 2) ] [ text "2 Hours" ]

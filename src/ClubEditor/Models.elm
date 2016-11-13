@@ -31,6 +31,7 @@ type alias ClubEditor =
     , showForHowLongBox : Maybe StopButton
     , isClubEditWindowVisible : Bool
     , systemMessage : Maybe SystemMessage
+    , stopMsg : String
     }
 
 

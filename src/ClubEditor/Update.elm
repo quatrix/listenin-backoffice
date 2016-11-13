@@ -94,14 +94,14 @@ update message model =
                     StopRecording ->
                         updateStop { club | stopRecording = howLong } model
 
-            ResumeStopped stopButtonType ->
+            ResumeStopped stopButtonType stopMsg ->
                 update (SubmitStopEvent stopButtonType 0) model
 
             CloseForHowLongModal ->
                 ( { model | showForHowLongBox = Nothing }, Cmd.none, Nothing )
 
-            AskForHowLong buttonType ->
-                ( { model | showForHowLongBox = Just buttonType }, Cmd.none, Nothing )
+            AskForHowLong buttonType msg->
+                ( { model | showForHowLongBox = Just buttonType, stopMsg = msg }, Cmd.none, Nothing )
 
             HideSystemMessage i ->
                 ( { model | systemMessage = Nothing }, Cmd.none, Nothing )

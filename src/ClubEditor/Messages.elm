@@ -15,8 +15,8 @@ type Msg
     | Save
     | DescriptionChanged String
     | ToggleTag String
-    | AskForHowLong StopButton
-    | ResumeStopped StopButton
+    | AskForHowLong StopButton String
+    | ResumeStopped StopButton String
     | SubmitStopEvent StopButton Int
     | CloseForHowLongModal
     | OpenClubEditWindow

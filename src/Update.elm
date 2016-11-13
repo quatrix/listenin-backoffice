@@ -55,6 +55,7 @@ update msg model =
                             , playing = ""
                             , showForHowLongBox = Nothing
                             , systemMessage = Nothing
+                            , stopMsg = ""
                             }
             in
                 ( { model | clubEditor = Just newClubEditor }, Cmd.none )
