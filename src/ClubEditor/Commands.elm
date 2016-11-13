@@ -7,7 +7,8 @@ import Json.Decode
 import Json.Encode
 import Task exposing (andThen, succeed)
 import Process exposing (sleep)
-import Commands exposing (clubUrl)
+import Commands exposing (fetch, clubUrl)
+import Messages
 
 
 serialized : Json.Encode.Value -> String
@@ -20,9 +21,12 @@ updateClub club =
     Http.post decodeClub clubUrl (Http.string (serialized (encodeClub club)))
         |> Task.perform UpdateClubFailed UpdateClubDone
 
+
 closeSystemMessage : Cmd Msg
 closeSystemMessage =
-    (sleep 300 `andThen` \_ -> (succeed 0)) |> Task.perform never HideSystemMessage 
+    (sleep 300 `andThen` \_ -> (succeed 0)) |> Task.perform never HideSystemMessage
+
 
 never : Never -> a
-never n = never n
+never n =
+    never n

@@ -4,6 +4,10 @@ import ClubEditor.Models exposing (Club, StopButton, SystemMessage)
 import Http
 
 
+type DispatchMsg
+    = RefetchClub
+
+
 type Msg
     = Play String
     | Delete String
@@ -20,3 +24,4 @@ type Msg
     | UpdateClubDone Club
     | UpdateClubFailed Http.Error
     | HideSystemMessage Int
+    | Dispatch DispatchMsg

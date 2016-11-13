@@ -1,6 +1,6 @@
 port module ClubEditor.Update exposing (..)
 
-import ClubEditor.Messages exposing (Msg(..))
+import ClubEditor.Messages exposing (Msg(..), DispatchMsg(..))
 import ClubEditor.Models exposing (..)
 import ClubEditor.Commands exposing (updateClub, closeSystemMessage)
 import String
@@ -12,7 +12,7 @@ port play : String -> Cmd msg
 port stop : String -> Cmd msg
 
 
-update : Msg -> ClubEditor -> ( ClubEditor, Cmd Msg )
+update : Msg -> ClubEditor -> ( ClubEditor, Cmd Msg, Maybe DispatchMsg )
 update message model =
     let
         club =
@@ -20,58 +20,61 @@ update message model =
     in
         case message of
             Play url ->
-                ( { model | playing = url }, play url )
+                ( { model | playing = url }, play url, Nothing )
 
             Stop ->
-                ( { model | playing = "" }, stop "" )
+                ( { model | playing = "" }, stop "", Nothing )
 
             Delete sample ->
-                ( model, Cmd.none )
+                ( model, Cmd.none, Nothing )
 
             UpdateClubDone club ->
                 let
-                    msg = 
+                    msg =
                         { isLoading = False
                         , msg = "Done..."
                         , msgType = Success
                         }
                 in
-                    ( { model | club = club, systemMessage = Just msg}, closeSystemMessage )
+                    ( { model | club = club, systemMessage = Just msg }, closeSystemMessage, Nothing )
 
             UpdateClubFailed error ->
                 let
-                    msg = 
+                    msg =
                         { isLoading = False
                         , msg = "Update failed!"
                         , msgType = Error
                         }
                 in
-                    ( { model | club = club, systemMessage = Just msg}, Cmd.none)
+                    ( { model | club = club, systemMessage = Just msg }, Cmd.none, Just RefetchClub )
 
             DescriptionChanged description ->
-                ( { model | club = { club | details = description } }, Cmd.none )
+                ( { model | club = { club | details = description } }, Cmd.none, Nothing )
 
             ToggleTag tag ->
-                ( { model | club = { club | tags = (toggleTag model.club.tags tag) } }, Cmd.none )
+                ( { model | club = { club | tags = (toggleTag model.club.tags tag) } }, Cmd.none, Nothing )
 
             Save ->
                 let
-                    msg = 
+                    msg =
                         { isLoading = True
                         , msg = "Saving..."
-                        , msgType = Info 
+                        , msgType = Info
                         }
                 in
-                    ( { model | 
-                          systemMessage = Just msg
+                    ( { model
+                        | systemMessage = Just msg
                         , isClubEditWindowVisible = False
-                       }, (updateClub model.club) )
+                      }
+                    , (updateClub model.club)
+                    , Nothing
+                    )
 
             OpenClubEditWindow ->
-                ( { model | isClubEditWindowVisible = not model.isClubEditWindowVisible }, Cmd.none )
+                ( { model | isClubEditWindowVisible = not model.isClubEditWindowVisible }, Cmd.none, Nothing )
 
             CloseClubEditWindow ->
-                ( { model | isClubEditWindowVisible = False }, Cmd.none )
+                ( { model | isClubEditWindowVisible = False }, Cmd.none, Nothing )
 
             SubmitStopEvent stopButtonType howLong ->
                 case stopButtonType of
@@ -88,16 +91,19 @@ update message model =
                 update (SubmitStopEvent stopButtonType 0) model
 
             CloseForHowLongModal ->
-                ( { model | showForHowLongBox = Nothing }, Cmd.none )
+                ( { model | showForHowLongBox = Nothing }, Cmd.none, Nothing )
 
             AskForHowLong buttonType ->
-                ( { model | showForHowLongBox = Just buttonType }, Cmd.none )
+                ( { model | showForHowLongBox = Just buttonType }, Cmd.none, Nothing )
 
             HideSystemMessage i ->
-                ( { model | systemMessage = Nothing}, Cmd.none )
+                ( { model | systemMessage = Nothing }, Cmd.none, Nothing )
+
+            Dispatch i ->
+                ( model, Cmd.none, Nothing )
 
 
-updateStop : Club -> ClubEditor -> ( ClubEditor, Cmd Msg )
+updateStop : Club -> ClubEditor -> ( ClubEditor, Cmd Msg, Maybe DispatchMsg )
 updateStop club model =
     let
         next =

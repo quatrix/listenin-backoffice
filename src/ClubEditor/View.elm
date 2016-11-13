@@ -38,27 +38,32 @@ systemMessage : Maybe SystemMessage -> Html Msg
 systemMessage msg =
     case msg of
         Just systemMessage ->
-            let 
-                spinner = if systemMessage.isLoading then 
-                    i[class "fa fa-cog fa-spin fa-2x fa-fw"][] 
-                else 
-                    i[][]
+            let
+                spinner =
+                    if systemMessage.isLoading then
+                        i [ class "fa fa-cog fa-spin fa-2x fa-fw" ] []
+                    else
+                        i [] []
 
-                closeButton = case systemMessage.msgType of
-                    Error ->
-                        i[] [button [onClick (HideSystemMessage 0)] [text "OK"]]
-                    Warning ->
-                        i[] [button [onClick (HideSystemMessage 0)] [text "OK"]]
-                    _ ->
-                        i[] []
+                closeButton =
+                    case systemMessage.msgType of
+                        Error ->
+                            i [] [ button [ onClick (HideSystemMessage 0) ] [ text "OK" ] ]
+
+                        Warning ->
+                            i [] [ button [ onClick (HideSystemMessage 0) ] [ text "OK" ] ]
+
+                        _ ->
+                            i [] []
             in
-                div[class ("flex absolute right " ++ (getMessageClassByType systemMessage.msgType))] 
-                [ spinner
-                , div[ class "h3" ] [ text systemMessage.msg ]
-                , closeButton
-                ]
+                div [ class ("flex absolute right " ++ (getMessageClassByType systemMessage.msgType)) ]
+                    [ spinner
+                    , div [ class "h3" ] [ text systemMessage.msg ]
+                    , closeButton
+                    ]
+
         Nothing ->
-            div[][]
+            div [] []
 
 
 getMessageClassByType : SystemMessageType -> String
@@ -66,12 +71,16 @@ getMessageClassByType t =
     case t of
         Info ->
             "bg-blue"
+
         Error ->
             "bg-red"
-        Warning -> 
+
+        Warning ->
             "bg-yellow"
+
         Success ->
             "bg-green"
+
 
 header : Club -> Html Msg
 header club =
@@ -119,19 +128,19 @@ stopButtons timeNow club showForHowLongBox =
             "Click to hide from club list"
 
         stopPublishingMsg =
-            "Publishing disabled, click to enable. will self enable in "
+            "Publishing disabled, click to enable. will self enable at "
 
         recordingMsg =
             "Recording. click to stop."
 
         stopRecordingMsg =
-            "Recording disabled, click to enable. will self enable in "
+            "Recording disabled, click to enable. will self enable at "
 
         recognizingMsg =
             "Recognizing. click to stop."
 
         stopRecognizingMsg =
-            "Sample recognition disabled. click to enable. will self enable in "
+            "Sample recognition disabled. click to enable. will self enable at "
     in
         div [ class "sm-col-5 bg-orange border" ]
             [ stopButton timeNow club.stopPublishing StopPublishing "fa-lock" publishingMsg stopPublishingMsg
@@ -149,14 +158,36 @@ stopButton timeNow forHowLong stopType icon disablingLable enablingLable =
 
         iconStyle =
             style [ ( "font-size", "30px" ) ]
+
+        buttonColorClass =
+            if forHowLong == 0 then
+                "bg-green"
+            else
+                "bg-red"
+
+        onClickAction =
+            if forHowLong == 0 then
+                AskForHowLong
+            else
+                ResumeStopped
+
+        label =
+            if forHowLong == 0 then
+                disablingLable
+            else
+                (enablingLable ++ (getHour timeNow forHowLong))
     in
-        if forHowLong == 0 then
-            button [ class "btn btn-primary bg-green", buttonStyle, onClick (AskForHowLong stopType) ] [ div [ iconStyle, class ("fa " ++ icon ++ " my1") ] [], div [] [ text disablingLable ] ]
-        else
-            button [ class "btn btn-primary bg-red", buttonStyle, onClick (ResumeStopped stopType) ] [ div [ iconStyle, class ("fa " ++ icon ++ " my1") ] [], div [] [ text (enablingLable ++ (getHour timeNow forHowLong)) ] ]
+        button
+            [ class ("btn btn-primary " ++ buttonColorClass)
+            , buttonStyle
+            , onClick (onClickAction stopType)
+            ]
+            [ div [ iconStyle, class ("fa " ++ icon ++ " my1") ] []
+            , div [] [ text label ]
+            ]
 
 
-getHour : Time -> Float -> String
+getHour : Time -> Int -> String
 getHour timeNow d =
     if d == -1 then
         "Never"

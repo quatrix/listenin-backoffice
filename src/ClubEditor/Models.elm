@@ -17,11 +17,13 @@ type SystemMessageType
     | Success
     | Info
 
+
 type alias SystemMessage =
-    { isLoading: Bool
-    , msg: String
-    , msgType: SystemMessageType
+    { isLoading : Bool
+    , msg : String
+    , msgType : SystemMessageType
     }
+
 
 type alias ClubEditor =
     { club : Club

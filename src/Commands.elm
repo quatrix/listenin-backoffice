@@ -6,6 +6,7 @@ import Time
 import Task
 import Http
 
+
 fetch : Cmd Msg
 fetch =
     Http.get decodeClub clubUrl
@@ -15,6 +16,7 @@ fetch =
 clubUrl : String
 clubUrl =
     "http://localhost:55669/clubs?club=radio"
+
 
 getTime : Cmd Msg
 getTime =
