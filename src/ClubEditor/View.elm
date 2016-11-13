@@ -121,33 +121,33 @@ clubEditWindow visible club =
         div [] []
 
 
-type alias StopActionMsgs = 
+type alias StopActionMsgs =
     { toStop : String
     , toStart : String
     , help : String
     }
 
+
 stopButtons : Time -> Club -> Maybe StopButton -> String -> Html Msg
 stopButtons timeNow club stopType stopMsg =
     let
-        publishing = 
+        publishing =
             { toStop = "Click to hide from club list"
             , toStart = "Publishing disabled, click to enable. will self enable at "
             , help = "Control your visibility. Users won't see your club for set amount of time, or if choosing forever, we'll hide you until you click again"
             }
 
-        recording = 
+        recording =
             { toStop = "Recording. click to stop."
             , toStart = "Recording disabled, click to enable. will self enable at "
             , help = "Temporary stop recording, this is useful when having live music / lectures. Users will still see you listed, and can listen to older samples from before stopping recording."
             }
 
-        recognition = 
+        recognition =
             { toStop = "Recognizing. click to stop."
             , toStart = "Sample recognition disabled. click to enable. will self enable at "
             , help = "If selected, we won't tag samples with the artist name / song title we recognize. User will only get the genre"
             }
-
     in
         div [ class "sm-col-5 bg-orange border" ]
             [ stopButton timeNow club.stopPublishing StopPublishing "fa-lock" publishing
@@ -246,7 +246,7 @@ sampleList : List Sample -> Time -> String -> Html Msg
 sampleList samples time playing =
     div [ class "p2" ]
         [ table []
-            [ div [class "h2"] [text "Track List"]
+            [ div [ class "h2" ] [ text "Track List" ]
             , tbody [] (List.map (sampleRow time playing) samples)
             ]
         ]
@@ -265,15 +265,16 @@ sampleRow time playing sample =
 
                 Nothing ->
                     "Unknown Title"
-        strikeThrough = if sample.metadata.hidden then
-            style [("text-decoration", "line-through")]
-        else
-            style []
 
+        strikeThrough =
+            if sample.metadata.hidden then
+                style [ ( "text-decoration", "line-through" ) ]
+            else
+                style []
     in
         tr []
-            [ td [strikeThrough] [ text name ]
-            , td [strikeThrough] [ text (humanizeTime time sample.date) ]
+            [ td [ strikeThrough ] [ text name ]
+            , td [ strikeThrough ] [ text (humanizeTime time sample.date) ]
             , td [] [ playButton playing sample.link ]
             , td [] [ toggleSampleVisibility sample ]
             ]
@@ -281,15 +282,28 @@ sampleRow time playing sample =
 
 toggleSampleVisibility : Sample -> Html Msg
 toggleSampleVisibility sample =
-    let 
-        hidden = sample.metadata.hidden
-        msg = if hidden then "Show" else "Hide"
-        color = if hidden then "bg-green" else "bg-red"
+    let
+        hidden =
+            sample.metadata.hidden
+
+        msg =
+            if hidden then
+                "Show"
+            else
+                "Hide"
+
+        color =
+            if hidden then
+                "bg-green"
+            else
+                "bg-red"
     in
-        button [ class ("btn btn-small " ++ color)
-            , onClick (ToggleSampleVisibility sample.link) 
-        ] 
-        [ text msg ]
+        button
+            [ class ("btn btn-small " ++ color)
+            , onClick (ToggleSampleVisibility sample.link)
+            ]
+            [ text msg ]
+
 
 playButton : String -> String -> Html Msg
 playButton playing link =

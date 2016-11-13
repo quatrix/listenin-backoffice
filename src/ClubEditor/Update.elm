@@ -29,8 +29,8 @@ update message model =
                 let
                     samples =
                         toggleSampleVisibility sample model.club.samples
-                    
-                    club = 
+
+                    club =
                         { club | samples = samples }
                 in
                     ( { model | club = club }, Cmd.none, Nothing )
@@ -100,7 +100,7 @@ update message model =
             CloseForHowLongModal ->
                 ( { model | showForHowLongBox = Nothing }, Cmd.none, Nothing )
 
-            AskForHowLong buttonType msg->
+            AskForHowLong buttonType msg ->
                 ( { model | showForHowLongBox = Just buttonType, stopMsg = msg }, Cmd.none, Nothing )
 
             HideSystemMessage i ->
@@ -136,14 +136,18 @@ flipHiddenIfMatches : String -> Sample -> Sample
 flipHiddenIfMatches link sample =
     if sample.link == link then
         let
-            metadata = sample.metadata
-            newMetadata = { metadata | hidden = not metadata.hidden }
+            metadata =
+                sample.metadata
+
+            newMetadata =
+                { metadata | hidden = not metadata.hidden }
         in
             { sample | metadata = newMetadata }
     else
-        Debug.log("eddie:: " ++ link ++ " / " ++ sample.link)
-        sample
+        Debug.log ("eddie:: " ++ link ++ " / " ++ sample.link)
+            sample
 
-toggleSampleVisibility: String -> List Sample -> List Sample
+
+toggleSampleVisibility : String -> List Sample -> List Sample
 toggleSampleVisibility sample samples =
     List.map (flipHiddenIfMatches sample) samples
