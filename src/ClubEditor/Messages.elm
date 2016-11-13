@@ -10,7 +10,7 @@ type DispatchMsg
 
 type Msg
     = Play String
-    | Delete String
+    | ToggleSampleVisibility String
     | Stop
     | Save
     | DescriptionChanged String

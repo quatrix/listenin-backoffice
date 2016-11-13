@@ -25,8 +25,15 @@ update message model =
             Stop ->
                 ( { model | playing = "" }, stop "", Nothing )
 
-            Delete sample ->
-                ( model, Cmd.none, Nothing )
+            ToggleSampleVisibility sample ->
+                let
+                    samples =
+                        toggleSampleVisibility sample model.club.samples
+                    
+                    club = 
+                        { club | samples = samples }
+                in
+                    ( { model | club = club }, Cmd.none, Nothing )
 
             UpdateClubDone club ->
                 let
@@ -123,3 +130,20 @@ toggleTag tags tag =
 isIn : String -> List String -> Bool
 isIn niddle hay =
     not (List.isEmpty (List.filter (\x -> (String.toLower x) == (String.toLower niddle)) hay))
+
+
+flipHiddenIfMatches : String -> Sample -> Sample
+flipHiddenIfMatches link sample =
+    if sample.link == link then
+        let
+            metadata = sample.metadata
+            newMetadata = { metadata | hidden = not metadata.hidden }
+        in
+            { sample | metadata = newMetadata }
+    else
+        Debug.log("eddie:: " ++ link ++ " / " ++ sample.link)
+        sample
+
+toggleSampleVisibility: String -> List Sample -> List Sample
+toggleSampleVisibility sample samples =
+    List.map (flipHiddenIfMatches sample) samples

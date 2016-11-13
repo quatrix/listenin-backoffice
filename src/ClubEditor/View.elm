@@ -239,14 +239,7 @@ sampleList : List Sample -> Time -> String -> Html Msg
 sampleList samples time playing =
     div [ class "p2" ]
         [ table []
-            [ thead []
-                [ tr []
-                    [ th [] [ text "name" ]
-                    , th [] [ text "when" ]
-                    , th [] [ text "play" ]
-                    , th [] [ text "remove" ]
-                    ]
-                ]
+            [ div [class "h2"] [text "Track List"]
             , tbody [] (List.map (sampleRow time playing) samples)
             ]
         ]
@@ -265,14 +258,31 @@ sampleRow time playing sample =
 
                 Nothing ->
                     "Unknown Title"
+        strikeThrough = if sample.metadata.hidden then
+            style [("text-decoration", "line-through")]
+        else
+            style []
+
     in
         tr []
-            [ td [] [ text name ]
-            , td [] [ text (humanizeTime time sample.date) ]
+            [ td [strikeThrough] [ text name ]
+            , td [strikeThrough] [ text (humanizeTime time sample.date) ]
             , td [] [ playButton playing sample.link ]
-            , td [] [ button [ class "btn btn-small bg-red", onClick (Delete sample.date) ] [ text "delete" ] ]
+            , td [] [ toggleSampleVisibility sample ]
             ]
 
+
+toggleSampleVisibility : Sample -> Html Msg
+toggleSampleVisibility sample =
+    let 
+        hidden = sample.metadata.hidden
+        msg = if hidden then "Show" else "Hide"
+        color = if hidden then "bg-green" else "bg-red"
+    in
+        button [ class ("btn btn-small " ++ color)
+            , onClick (ToggleSampleVisibility sample.link) 
+        ] 
+        [ text msg ]
 
 playButton : String -> String -> Html Msg
 playButton playing link =
