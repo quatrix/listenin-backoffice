@@ -7,6 +7,9 @@ import Html.Events exposing (onClick, onInput)
 import ClubEditor.Models exposing (..)
 import ClubEditor.Update exposing (isIn)
 import ClubEditor.Messages exposing (..)
+import ClubEditor.BoxState exposing (currentBoxState)
+import ClubEditor.Utils exposing (humanizeTime)
+import Models exposing (BoxState)
 import Messages
 import Time exposing (Time)
 import Date
@@ -14,8 +17,8 @@ import Date.Extra.Duration as Duration
 import String
 
 
-view : ClubEditor -> Time -> Html Msg
-view clubEditor time =
+view : ClubEditor -> Time -> Maybe BoxState -> Html Msg
+view clubEditor time boxState =
     let
         club =
             clubEditor.club
@@ -24,6 +27,7 @@ view clubEditor time =
             [ systemMessage clubEditor.systemMessage
             , header club
             , clubEditWindow clubEditor.isClubEditWindowVisible club
+            , currentBoxState boxState time
             , stopButtons time club clubEditor.showForHowLongBox clubEditor.stopMsg
             , audio
                 [ id "audio-player"
@@ -56,7 +60,7 @@ systemMessage msg =
                         _ ->
                             i [] []
             in
-                div [ class ("flex absolute right " ++ (getMessageClassByType systemMessage.msgType)) ]
+                div [ style [("margin-left", "300px")], class ("flex absolute " ++ (getMessageClassByType systemMessage.msgType)) ]
                     [ spinner
                     , div [ class "h3" ] [ text systemMessage.msg ]
                     , closeButton
@@ -84,10 +88,12 @@ getMessageClassByType t =
 
 header : Club -> Html Msg
 header club =
-    div [ class "flex h1" ]
-        [ img [ src club.logo.xxxhdpi, style [ ( "width", "50px" ), ( "height", "50px" ) ] ] []
-        , text club.name
-        , button [ class "btn btn-primary mb1 bg-teal", onClick OpenClubEditWindow ] [ i [ class "fa fa-info mr1" ] [], text "Edit Info" ]
+    div [ class "flex p1 justify-between" ]
+        [ div [class "h1 flex", style [("font-family", "Lato")]]
+          [ img [ class "mr1", src club.logo.xxxhdpi, style [ ( "width", "50px" ), ( "height", "50px" ) ] ] []
+          , text (String.toUpper club.name)
+          ]
+        , button [ class "btn h2 bg-yellow", onClick OpenClubEditWindow ] [ i [ class "fa fa-info-circle" ] []]
         ]
 
 
@@ -95,7 +101,7 @@ clubEditWindow : Bool -> Club -> Html Msg
 clubEditWindow visible club =
     if visible then
         div []
-            [ div [ class "p2 bg-yellow border rounded sm-col-5" ]
+            [ div [ class "p2" ]
                 [ div []
                     [ text "Description"
                     , textarea [ class "textarea", rows 3, onInput DescriptionChanged ] [ text club.details ]
@@ -111,8 +117,8 @@ clubEditWindow visible club =
                         , "Large"
                         ]
                     )
-                , div []
-                    [ button [ class "btn btn-primary", onClick Save ] [ text "Save" ]
+                , div [class "my1"]
+                    [ button [ class "btn btn-primary mr1", onClick Save ] [ text "Save" ]
                     , button [ class "btn bg-gray", onClick CloseClubEditWindow ] [ text "Cancel" ]
                     ]
                 ]
@@ -149,10 +155,12 @@ stopButtons timeNow club stopType stopMsg =
             , help = "If selected, we won't tag samples with the artist name / song title we recognize. User will only get the genre"
             }
     in
-        div [ class "sm-col-5 bg-orange border" ]
-            [ stopButton timeNow club.stopPublishing StopPublishing "fa-lock" publishing
-            , stopButton timeNow club.stopRecording StopRecording "fa-circle" recording
-            , stopButton timeNow club.stopRecognition StopRecognition "fa-headphones" recognition
+        div [class "p1 "]
+            [ div [class "flex justify-between"] 
+                [ stopButton timeNow club.stopPublishing StopPublishing "fa-low-vision" publishing
+                 , stopButton timeNow club.stopRecording StopRecording "fa-circle" recording
+                 , stopButton timeNow club.stopRecognition StopRecognition "fa-headphones" recognition
+                ] 
             , forHowLongBox stopType stopMsg
             ]
 
@@ -214,11 +222,11 @@ forHowLongBox stopButtonType description =
     case stopButtonType of
         Just stopButton ->
             div []
-                [ div [ class "h3" ] [ text description ]
-                , div []
-                    [ button [ class "btn btn-primary", onClick (SubmitStopEvent stopButton 1) ] [ text "1 Hour" ]
-                    , button [ class "btn btn-primary", onClick (SubmitStopEvent stopButton 2) ] [ text "2 Hours" ]
-                    , button [ class "btn btn-primary", onClick (SubmitStopEvent stopButton -1) ] [ text "Forever" ]
+                [ div [ class "p1" ] [ text description ]
+                , div [ class "p1" ]
+                    [ button [ class "btn btn-primary mr1", onClick (SubmitStopEvent stopButton 1) ] [ text "1 Hour" ]
+                    , button [ class "btn btn-primary mr1", onClick (SubmitStopEvent stopButton 2) ] [ text "2 Hours" ]
+                    , button [ class "btn btn-primary mr1", onClick (SubmitStopEvent stopButton -1) ] [ text "Forever" ]
                     , button [ class "btn bg-gray", onClick CloseForHowLongModal ] [ text "Cancel" ]
                     ]
                 ]
@@ -244,11 +252,9 @@ checkbox msg name isChecked =
 
 sampleList : List Sample -> Time -> String -> Html Msg
 sampleList samples time playing =
-    div [ class "p2" ]
-        [ table []
-            [ div [ class "h2" ] [ text "Track List" ]
-            , tbody [] (List.map (sampleRow time playing) samples)
-            ]
+    div [ class "p1" ]
+        [ div [ class "h2" ] [ text "Track List" ]
+        , table [class "table", style [("width", "100%")]] [ tbody [] (List.map (sampleRow time playing) samples) ]
         ]
 
 
@@ -286,60 +292,22 @@ toggleSampleVisibility sample =
         hidden =
             sample.metadata.hidden
 
-        msg =
+        icon =
             if hidden then
-                "Show"
+                "fa-undo"
             else
-                "Hide"
-
-        color =
-            if hidden then
-                "bg-green"
-            else
-                "bg-red"
+                "fa-trash"
     in
         button
-            [ class ("btn btn-small " ++ color)
+            [ class "btn btn-small"
             , onClick (ToggleSampleVisibility sample.link)
             ]
-            [ text msg ]
+            [ i [class ("fa " ++ icon)][]]
 
 
 playButton : String -> String -> Html Msg
 playButton playing link =
     if playing == link then
-        button [ class "btn btn-small bg-blue", onClick (Stop) ] [ text "stop" ]
+        button [ class "btn btn-small", onClick (Stop) ] [ i [class "fa fa-stop"] [] ]
     else
-        button [ class "btn btn-small bg-blue", onClick (Play link) ] [ text "play" ]
-
-
-toTimeAgo : Time -> String
-toTimeAgo secondDiff =
-    if secondDiff < 60 then
-        (toString secondDiff) ++ " seconds ago"
-    else if secondDiff < 120 then
-        "About a minute ago"
-    else if secondDiff < 3600 then
-        (toString (secondDiff // 60)) ++ " minutes ago"
-    else if secondDiff < 7200 then
-        "About an hour ago"
-    else if secondDiff < 86400 then
-        "About " ++ toString (secondDiff // 3600) ++ " hours ago"
-    else if secondDiff < 172800 then
-        "Yesterday"
-    else
-        (toString (secondDiff // 86400)) ++ " days ago"
-
-
-humanizeTime : Time -> String -> String
-humanizeTime currentTime sampleTime =
-    let
-        r =
-            Date.fromString sampleTime
-    in
-        case r of
-            Result.Ok d ->
-                toTimeAgo ((currentTime / 1000) - ((Date.toTime d) / 1000))
-
-            Result.Err e ->
-                toString e
+        button [ class "btn btn-small", onClick (Play link) ] [ i [class "fa fa-play"] [] ]

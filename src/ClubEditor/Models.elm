@@ -1,7 +1,7 @@
 module ClubEditor.Models exposing (..)
 
-import Json.Decode exposing ((:=))
 import Json.Encode
+import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:), withDefault)
 
 

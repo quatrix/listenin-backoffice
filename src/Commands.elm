@@ -15,7 +15,7 @@ fetch =
 
 clubUrl : String
 clubUrl =
-    "http://localhost:55669/clubs?club=radio"
+    "http://localhost:55669/clubs?club=kulialma"
 
 
 getTime : Cmd Msg

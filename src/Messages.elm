@@ -11,3 +11,4 @@ type Msg
     | GotTime Time
     | FetchDone Club
     | FetchFailed Http.Error
+    | BoxStateUpdate String

@@ -49,7 +49,7 @@ update message model =
                 let
                     msg =
                         { isLoading = False
-                        , msg = "Update failed!"
+                        , msg = (toString error)
                         , msgType = Error
                         }
                 in

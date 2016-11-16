@@ -24,7 +24,8 @@ updateClub club =
 
 closeSystemMessage : Cmd Msg
 closeSystemMessage =
-    (sleep 300 `andThen` \_ -> (succeed 0)) |> Task.perform never HideSystemMessage
+    --(sleep 300 `andThen` \_ -> (succeed 0)) |> Task.perform never HideSystemMessage
+    succeed 0 |> Task.perform never HideSystemMessage
 
 
 never : Never -> a

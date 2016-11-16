@@ -7,6 +7,7 @@ import View exposing (view)
 import Update exposing (update)
 import Commands exposing (..)
 import ClubEditor.Commands exposing (..)
+import WebSocket
 
 
 init : ( Model, Cmd Msg )
@@ -16,7 +17,8 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    WebSocket.listen "ws://listenin.io:9998/updates/radio/" BoxStateUpdate
+
 
 
 
