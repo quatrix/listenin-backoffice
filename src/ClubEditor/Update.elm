@@ -2,7 +2,7 @@ port module ClubEditor.Update exposing (..)
 
 import ClubEditor.Messages exposing (Msg(..), DispatchMsg(..))
 import ClubEditor.Models exposing (..)
-import ClubEditor.Commands exposing (updateClub, closeSystemMessage)
+import ClubEditor.Commands exposing (updateClub, closeSystemMessage, toggleSample)
 import String
 
 
@@ -25,15 +25,41 @@ update message model =
             Stop ->
                 ( { model | playing = "" }, stop "", Nothing )
 
-            ToggleSampleVisibility sample ->
+            ToggleSampleVisibility sample_id ->
                 let
                     samples =
-                        toggleSampleVisibility sample model.club.samples
+                        toggleSampleVisibility sample_id model.club.samples
 
                     club =
                         { club | samples = samples }
+
+                    msg =
+                        { isLoading = True
+                        , msg = "Saving..."
+                        , msgType = Info
+                        }
                 in
-                    ( { model | club = club }, Cmd.none, Nothing )
+                    ( { model | club = club, systemMessage = Just msg }, (toggleSample model.token sample_id) , Nothing )
+
+            ToggleSampleDone res -> 
+                let
+                    msg =
+                        { isLoading = False
+                        , msg = "Done..."
+                        , msgType = Success
+                        }
+                in
+                    ( { model | systemMessage = Just msg }, closeSystemMessage, Nothing )
+
+            ToggleSampleFailed error ->
+                let
+                    msg =
+                        { isLoading = False
+                        , msg = (toString error)
+                        , msgType = Error
+                        }
+                in
+                    ( { model | systemMessage = Just msg }, Cmd.none, Just RefetchClub )
 
             UpdateClubDone club ->
                 let
@@ -73,7 +99,7 @@ update message model =
                         | systemMessage = Just msg
                         , isClubEditWindowVisible = False
                       }
-                    , (updateClub model.club)
+                    , (updateClub model.token model.club)
                     , Nothing
                     )
 
@@ -132,9 +158,9 @@ isIn niddle hay =
     not (List.isEmpty (List.filter (\x -> (String.toLower x) == (String.toLower niddle)) hay))
 
 
-flipHiddenIfMatches : String -> Sample -> Sample
-flipHiddenIfMatches link sample =
-    if sample.link == link then
+flipHiddenIfMatches : Int -> Sample -> Sample
+flipHiddenIfMatches sample_id sample =
+    if sample.id == sample_id then
         let
             metadata =
                 sample.metadata
@@ -144,10 +170,9 @@ flipHiddenIfMatches link sample =
         in
             { sample | metadata = newMetadata }
     else
-        Debug.log ("eddie:: " ++ link ++ " / " ++ sample.link)
-            sample
+        sample
 
 
-toggleSampleVisibility : String -> List Sample -> List Sample
-toggleSampleVisibility sample samples =
-    List.map (flipHiddenIfMatches sample) samples
+toggleSampleVisibility : Int -> List Sample -> List Sample
+toggleSampleVisibility sample_id samples =
+    List.map (flipHiddenIfMatches sample_id) samples

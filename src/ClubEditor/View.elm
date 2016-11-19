@@ -27,7 +27,7 @@ view clubEditor time boxState =
             [ systemMessage clubEditor.systemMessage
             , header club
             , clubEditWindow clubEditor.isClubEditWindowVisible club
-            , currentBoxState boxState time
+            , div[ class "p1"] [currentBoxState boxState time]
             , stopButtons time club clubEditor.showForHowLongBox clubEditor.stopMsg
             , audio
                 [ id "audio-player"
@@ -300,7 +300,7 @@ toggleSampleVisibility sample =
     in
         button
             [ class "btn btn-small"
-            , onClick (ToggleSampleVisibility sample.link)
+            , onClick (ToggleSampleVisibility sample.id)
             ]
             [ i [class ("fa " ++ icon)][]]
 

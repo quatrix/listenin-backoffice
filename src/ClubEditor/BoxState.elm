@@ -11,40 +11,52 @@ currentBoxState : Maybe BoxState -> Time -> Html Msg
 currentBoxState boxState timeNow =
     case boxState of
         Just state ->
-            drawBoxState state timeNow
+            div [class "p1 border bg-silver" ] 
+            [ div[ class "h5" ] [text "Box state:"]
+            , drawBoxState state timeNow
+            ]
         Nothing ->
-            div[][text "Getting box status..."]
+            div[class "p1"][text "Getting box status..."]
 
 drawBoxState : BoxState -> Time -> Html Msg
 drawBoxState state timeNow =
     case state.blink of
         Just blink ->
-            if blink.time > 100 then
-                div[class "p1"] 
-                [ somethingFresh timeNow state.color drawLED drawStaleLED drawMissingLED
-                , somethingFresh timeNow state.status drawStatus drawStaleStatus drawMissingStatus
-                ]
-            else
-                div[class "p1"] [ text "last time we heard from box was way ago"]
+            let
+                td = (timeNow - (toFloat blink.time))
+            in
+                if td > 60 * 10 then
+                    div[class "p1"] [ text ("Last box event was " ++ (toTimeAgo td))]
+                else
+                    div[class "p1"] 
+                    [ somethingFresh timeNow state.status drawStatus drawStaleStatus drawMissingStatus
+                    , somethingFresh timeNow state.color drawLED drawStaleLED drawMissingLED
+                    , drawBlink timeNow blink
+                    ]
         Nothing ->
             div[class "p1"] [text "Last blink unknown"]
 
 
-somethingFresh : Time -> Maybe BoxStateValue -> (BoxStateValue -> Html Msg) -> (Time -> BoxStateValue -> Html Msg) -> (Html Msg) -> Html Msg
+drawBlink : Time -> BoxStateValue -> Html Msg
+drawBlink timeNow blink =
+    div []
+    [ div [class "h5"][ text ("last keep-alive " ++ (toTimeAgo (timeNow - (toFloat blink.time))))]]
+
+
+somethingFresh : Time -> Maybe BoxStateValue -> (Time -> BoxStateValue -> Html Msg) -> (Time -> BoxStateValue -> Html Msg) -> (Html Msg) -> Html Msg
 somethingFresh timeNow v onValid onStale onMissing =
     case v of
         Just value -> 
-
-            if (timeNow - toFloat(value.time)) > 2 then 
+            if (timeNow - toFloat(value.time)) > 60 * 5 then 
                 onStale timeNow value
             else
-                onValid value
+                onValid timeNow value
         Nothing -> 
             onMissing
 
 
-drawLED : BoxStateValue -> Html Msg
-drawLED v =
+drawLED : Time -> BoxStateValue -> Html Msg
+drawLED timeNow v =
     div[class "flex items-center h3"] 
     [ i[class ("fa mr1 fa-circle " ++ v.value)] []
     , text (ledColorToMeaning v.value)
@@ -65,25 +77,37 @@ drawStaleLED : Time -> BoxStateValue -> Html Msg
 drawStaleLED timeNow v =
     div[class "flex items-center h3"] 
     [ i[class ("fa mr1 fa-circle gray")] []
-    , text ("last led color was " ++ (toTimeAgo (timeNow - (toFloat v.time))))
+    , text ("last state change was " ++ (toTimeAgo (timeNow - (toFloat v.time))))
     ]
+
 
 drawMissingLED : Html Msg 
 drawMissingLED =
-    div[] [text "led missing"]
+    div[class "flex items-center h3"] 
+    [ i[class ("fa mr1 fa-circle gray")] []
+    , text ("box state unknown")
+    ]
 
 
-
-drawStatus : BoxStateValue -> Html Msg
-drawStatus v =
-    div[] [text v.value]
+drawStatus : Time -> BoxStateValue -> Html Msg
+drawStatus timeNow v =
+    let
+        td = timeNow - (toFloat v.time)
+    in
+        div[]
+        [ i[class "h3"] [text v.value]
+        , i[class "ml1 h6"] [text ("(" ++ (toTimeAgo td) ++ ")")]
+        ]
     
 drawStaleStatus : Time -> BoxStateValue -> Html Msg 
-drawStaleStatus timeNow t =
-    div[] [text "status stale"]
+drawStaleStatus timeNow v =
+    let
+        td = timeNow - (toFloat v.time)
+    in
+        i[class "h3"] [text ("Last known box state was " ++ (toTimeAgo td))]
         
 
 drawMissingStatus : Html Msg 
 drawMissingStatus =
-    div[] [text "status missing"]
+    i[class "h3"] [text "Box state unknown"]
 

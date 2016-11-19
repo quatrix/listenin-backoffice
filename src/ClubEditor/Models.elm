@@ -25,6 +25,11 @@ type alias SystemMessage =
     }
 
 
+type alias ServerResponse =
+    { success : Bool
+    , error : Maybe String
+    }
+
 type alias ClubEditor =
     { club : Club
     , playing : String
@@ -32,6 +37,7 @@ type alias ClubEditor =
     , isClubEditWindowVisible : Bool
     , systemMessage : Maybe SystemMessage
     , stopMsg : String
+    , token : String
     }
 
 
@@ -50,6 +56,7 @@ type alias Club =
 type alias Sample =
     { date : String
     , link : String
+    , id : Int
     , metadata : SampleMetadata
     }
 
@@ -91,12 +98,18 @@ decodeLogo =
     Json.Decode.succeed Logo
         |: ("xxxhdpi" := Json.Decode.string)
 
+decodeServerResponse : Json.Decode.Decoder ServerResponse
+decodeServerResponse =
+    Json.Decode.succeed ServerResponse
+        |: ("success" := Json.Decode.bool)
+        |: ("error" := (Json.Decode.maybe Json.Decode.string))
 
 decodeSample : Json.Decode.Decoder Sample
 decodeSample =
     Json.Decode.succeed Sample
         |: ("date" := Json.Decode.string)
         |: ("link" := Json.Decode.string)
+        |: ("_created" := Json.Decode.int)
         |: ("metadata" := decodeSampleMetadata)
 
 

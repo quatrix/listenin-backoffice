@@ -1,6 +1,7 @@
 module Models exposing (..)
 
 import ClubEditor.Models exposing (ClubEditor, Club, Logo)
+import Login.Models exposing (Login)
 import Time exposing (Time)
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:), withDefault)
@@ -9,6 +10,7 @@ type alias Model =
     { clubEditor : Maybe ClubEditor
     , time : Time
     , boxState : Maybe BoxState
+    , login : Login
     }
 
 type alias BoxState =
@@ -42,4 +44,5 @@ initialModel =
     { clubEditor = Nothing
     , time = 0.0
     , boxState = Nothing
+    , login = {error = Nothing, token = Nothing, username = "", password = ""}
     }

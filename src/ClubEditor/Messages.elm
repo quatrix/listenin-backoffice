@@ -1,6 +1,6 @@
 module ClubEditor.Messages exposing (..)
 
-import ClubEditor.Models exposing (Club, StopButton, SystemMessage)
+import ClubEditor.Models exposing (Club, StopButton, SystemMessage, ServerResponse)
 import Http
 
 
@@ -10,7 +10,7 @@ type DispatchMsg
 
 type Msg
     = Play String
-    | ToggleSampleVisibility String
+    | ToggleSampleVisibility Int
     | Stop
     | Save
     | DescriptionChanged String
@@ -23,5 +23,7 @@ type Msg
     | CloseClubEditWindow
     | UpdateClubDone Club
     | UpdateClubFailed Http.Error
+    | ToggleSampleDone ServerResponse
+    | ToggleSampleFailed Http.Error
     | HideSystemMessage Int
     | Dispatch DispatchMsg

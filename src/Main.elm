@@ -8,19 +8,32 @@ import Update exposing (update)
 import Commands exposing (..)
 import ClubEditor.Commands exposing (..)
 import WebSocket
+import Time exposing (every, second)
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.batch [ getTime, fetch ] )
+    ( initialModel, getTime )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen "ws://listenin.io:9998/updates/radio/" BoxStateUpdate
+    case model.login.token of
+        Just token ->
+            Sub.batch 
+                [ WebSocket.listen (getWSUrl token) BoxStateUpdate
+                , every second Tick
+                ]
+        Nothing ->
+            Sub.none
 
+getWSUrl : String -> String
+getWSUrl token =
+    wsUrl ++ "?token=" ++ token
 
-
+wsUrl : String
+wsUrl =
+    "ws://listenin.io:9998/updates/"
 
 -- MAIN
 

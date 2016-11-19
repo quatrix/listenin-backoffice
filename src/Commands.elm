@@ -7,20 +7,25 @@ import Task
 import Http
 
 
-fetch : Cmd Msg
-fetch =
-    Http.get decodeClub clubUrl
+fetch : String -> Cmd Msg
+fetch token =
+    Http.get decodeClub (getClubUrl token)
         |> Task.perform FetchFailed FetchDone
 
 
-clubUrl : String
-clubUrl =
-    "http://localhost:55669/clubs?club=kulialma"
+getClubUrl : String -> String
+getClubUrl token = 
+    apiUrl ++ "/bo?token=" ++ token
+
+
+apiUrl : String
+apiUrl =
+    "http://localhost:55669"
 
 
 getTime : Cmd Msg
 getTime =
-    Task.perform assertNeverHandler GotTime Time.now
+    Task.perform assertNeverHandler Tick Time.now
 
 
 assertNeverHandler : a -> b
