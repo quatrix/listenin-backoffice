@@ -15,17 +15,17 @@ update message model =
             ({model | password = password}, Cmd.none, Nothing)
 
         Submit ->
-            (model, (getToken model.username model.password), Nothing)
+            ({model | waiting = True}, (getToken model.username model.password), Nothing)
 
         LoginOk login -> 
             case login.token of
                 Just token ->
-                    ({model | token = Just token}, Cmd.none, Just FetchClub)
+                    ({model | waiting = False, token = Just token}, Cmd.none, Just FetchClub)
                 Nothing ->
-                    ({model | error = Just "got none for token!!"}, Cmd.none, Nothing)
+                    ({model | waiting = False, error = Just "invalid login"}, Cmd.none, Nothing)
 
         LoginFailed error -> 
-            ({model | error = Just (toString error)}, Cmd.none, Nothing)
+            ({model | waiting = False, error = Just (toString error)}, Cmd.none, Nothing)
 
         Dispatch i -> 
             (model, Cmd.none, Nothing)

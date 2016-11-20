@@ -44,5 +44,5 @@ initialModel =
     { clubEditor = Nothing
     , time = 0.0
     , boxState = Nothing
-    , login = {error = Nothing, token = Nothing, username = "", password = ""}
+    , login = {error = Nothing, token = Nothing, username = "", password = "", waiting = False}
     }

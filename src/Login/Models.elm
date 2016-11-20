@@ -8,6 +8,7 @@ type alias Login =
     , token : Maybe String
     , username : String
     , password : String
+    , waiting : Bool
     }
 
 type alias LoginResponse =
