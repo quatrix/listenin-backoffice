@@ -74,6 +74,7 @@ update msg model =
                 ( { model | clubEditor = Just newClubEditor }, Cmd.none )
 
         FetchFailed error ->
+            Debug.log("omg: " ++ (toString error))
             ( model, Cmd.none )
 
         Tick now ->

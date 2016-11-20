@@ -13,7 +13,7 @@ getToken username password =
 
 tokenUrl : String
 tokenUrl =
-    "http://localhost:55669/token"
+    "http://api.listenin.io/token"
 
 getTokenUrl : String -> String -> String
 getTokenUrl username password =

@@ -20,7 +20,7 @@ getClubUrl token =
 
 apiUrl : String
 apiUrl =
-    "http://localhost:55669"
+    "http://api.listenin.io"
 
 
 getTime : Cmd Msg

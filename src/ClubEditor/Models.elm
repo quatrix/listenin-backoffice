@@ -77,6 +77,7 @@ type alias SampleMetadataRecognized_song =
 type alias SampleMetadata =
     { recognized_song : Maybe SampleMetadataRecognized_song
     , hidden : Bool
+    , keep_unrecognized: Bool
     }
 
 
@@ -116,8 +117,12 @@ decodeSample =
 decodeSampleMetadata : Json.Decode.Decoder SampleMetadata
 decodeSampleMetadata =
     Json.Decode.succeed SampleMetadata
-        |: ("recognized_song" := Json.Decode.maybe decodeSampleMetadataRecognized_song)
+        |: Json.Decode.oneOf
+            [ ("recognized_song" := Json.Decode.maybe decodeSampleMetadataRecognized_song)
+            , Json.Decode.succeed Nothing
+            ]
         |: ("hidden" := Json.Decode.bool)
+        |: ("keep_unrecognized" := Json.Decode.bool)
 
 
 decodeSampleMetadataRecognized_song : Json.Decode.Decoder SampleMetadataRecognized_song

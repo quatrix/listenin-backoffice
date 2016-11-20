@@ -273,14 +273,21 @@ sampleRow time playing sample =
                     "Unknown Title"
 
         strikeThrough =
-            if sample.metadata.hidden then
+            if sample.metadata.keep_unrecognized then
                 style [ ( "text-decoration", "line-through" ) ]
             else
                 style []
+
+        hidden =
+            if sample.metadata.hidden then
+                "fa-eye-slash red"
+            else
+                "fa-eye green"
     in
         tr []
-            [ td [ strikeThrough ] [ text name ]
-            , td [ strikeThrough ] [ text (humanizeTime time sample.date) ]
+            [ td [] [i[class ("fa " ++ hidden)][] ]
+            , td [ strikeThrough ] [ text name ]
+            , td [ ] [ text (humanizeTime time sample.date) ]
             , td [] [ playButton playing sample.link ]
             , td [] [ toggleSampleVisibility sample ]
             ]
