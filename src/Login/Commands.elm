@@ -1,20 +1,24 @@
 module Login.Commands exposing (..)
 import Login.Messages exposing (Msg(..))
-import Login.Models exposing (decodeLoginResponse)
+import Login.Models exposing (decodeLoginResponse, encodeTokenRequest, TokenRequest)
+import ClubEditor.Commands exposing (serialized)
+import Commands exposing (apiUrl)
 
 import Http
 import Task
 
 
-getToken : String -> String -> Cmd Msg
+getToken: String -> String -> Cmd Msg
 getToken username password =
-    Http.get decodeLoginResponse (getTokenUrl username password)
+    let
+        request = 
+            { username = username
+            , password = password
+            }
+    in
+        Http.post decodeLoginResponse getTokenUrl (Http.string (serialized (encodeTokenRequest request)))
         |> Task.perform LoginFailed LoginOk
 
-tokenUrl : String
-tokenUrl =
-    "http://api.listenin.io/token"
-
-getTokenUrl : String -> String -> String
-getTokenUrl username password =
-    tokenUrl ++ "?username=" ++ username ++ "&password=" ++ password
+getTokenUrl : String
+getTokenUrl =
+    apiUrl ++ "/token"
